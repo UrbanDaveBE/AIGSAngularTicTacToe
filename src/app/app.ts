@@ -1,35 +1,30 @@
 import { Component, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { GameService } from './services/game.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div style="padding: 20px; font-family: sans-serif;">
-      <h1>AIGS PING TEST</h1>
-      <button (click)="doPing()" style="padding: 10px; cursor: pointer;">
-        PING PING PING!
-      </button>
-      <p>Status: <strong>{{ message }}</strong></p>
-    </div>
-  `
+  imports: [CommonModule, FormsModule],
+  templateUrl: './app.html'
 })
 export class App {
-  private http = inject(HttpClient);
-  message = 'Noch nicht gepingt';
+  public gameService = inject(GameService);
 
-  doPing() {
+  isTesting = false;
+  pingClicked = false;
 
-    this.http.get<any>('/api/ping').subscribe({
-      next: (res) => {
-        this.message = res.ping;
-      },
-      error: (err) => {
-        this.message = 'Fehler: Server nicht erreichbar!';
-        console.error(err);
-      }
-    });
+  onCheckPing() {
+    this.isTesting = true;
+    this.pingClicked = true;
+
+    // Kleiner Timeout für visuelles Feedback im UI
+    setTimeout(() => {
+      this.gameService.checkConnection().subscribe({
+        next: () => this.isTesting = false,
+        error: () => this.isTesting = false
+      });
+    }, 600);
   }
 }
