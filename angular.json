@@ -59,7 +59,8 @@
               "buildTarget": "AngularTicTacToe:build:production"
             },
             "development": {
-              "buildTarget": "AngularTicTacToe:build:development"
+              "buildTarget": "AngularTicTacToe:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
