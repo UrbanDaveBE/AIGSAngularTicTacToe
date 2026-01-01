@@ -1,52 +1,138 @@
-<div class="min-h-screen bg-slate-50 text-slate-900 p-8 font-sans">
-  <header class="text-center mb-12">
-    <h1 class="text-3xl font-bold tracking-tight text-slate-800">AIGS TicTacToe Client</h1>
-    <p class="text-slate-500 text-sm mt-2">FHNW - SEL: AIGS Project</p>
+<div class="min-h-screen bg-slate-50 text-slate-900 p-8 font-sans flex flex-col items-center">
+  <header class="mb-12">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-800 text-center uppercase tracking-widest">AIGS TicTacToe Client</h1>
+    <p class="text-slate-500 text-sm mt-2 text-center font-medium">FHNW - SEL: AIGS Project</p>
   </header>
 
-  <main class="max-w-md mx-auto space-y-8">
+  <main class="w-full max-w-md space-y-8">
+
     <!-- SEKTION 1: Server-Konfiguration -->
-    <section class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
-      <div class="flex items-center gap-4 mb-6">
-        <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-center">1</span>
-        <h2 class="text-xl font-semibold text-slate-800">Server-Konfiguration</h2>
+    <section class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden text-center">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+          <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">1</span>
+          <h2 class="text-xl font-semibold text-slate-800 uppercase tracking-tight">Server</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="text-[10px] font-bold px-2 py-1 rounded-full transition-colors uppercase"
+               [class]="isTesting() ? 'bg-blue-100 text-blue-700' : (gameService.isOnline() ? 'bg-emerald-100 text-emerald-700' : (pingClicked() ? 'bg-red-100 text-red-700' : 'bg-slate-200 text-slate-600'))">
+            {{ isTesting() ? 'Prüfe...' : (gameService.isOnline() ? 'Online' : 'Offline') }}
+          </div>
+          <button (click)='onCheckPing()' [disabled]='isTesting()' class="text-blue-600 hover:text-blue-800 p-1 transition-transform active:rotate-45">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div class="space-y-4">
-        <div>
-          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Server Adresse (read-only)</label>
-          <div class="relative flex items-center">
-            <input type="text" [ngModel]="gameService.host" readonly
-                   class="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 cursor-not-allowed outline-none">
-
-            <div class="absolute right-3 text-[10px] font-bold px-2 py-1 rounded-full transition-colors"
-                 [class]="isTesting ? 'bg-blue-100 text-blue-700' : (gameService.isOnline() ? 'bg-emerald-100 text-emerald-700' : (pingClicked ? 'bg-red-100 text-red-700' : 'bg-slate-200 text-slate-600'))">
-              {{ isTesting ? 'Testing' : (gameService.isOnline() ? 'Success' : (pingClicked ? 'Failed' : 'Pending')) }}
-            </div>
-          </div>
+      <!-- Proxy Toggle Switch -->
+      <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl mb-6 border border-slate-100">
+        <div class="text-left">
+          <p class="text-[10px] font-bold uppercase text-slate-400">Verbindungs-Modus</p>
+          <p class="text-xs font-semibold text-slate-700">{{ gameService.useProxy() ? 'Angular Proxy (/api)' : 'Direktzugriff (URL)' }}</p>
         </div>
-
-        <div>
-          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Port</label>
-          <input type="number" [ngModel]="gameService.port" readonly
-                 class="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 cursor-not-allowed outline-none">
-        </div>
-
-        <p class="text-[11px] text-slate-400 italic">Konfiguration erfolgt zentral im Proxy. (siehe README.md)</p>
-
-        <button (click)="onCheckPing()" [disabled]="isTesting"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-70 disabled:cursor-wait shadow-lg shadow-blue-200">
-          {{ isTesting ? 'Verbinde...' : 'Server prüfen' }}
+        <button (click)="gameService.toggleProxy()"
+                class="w-12 h-6 rounded-full p-1 transition-colors duration-300 relative"
+                [class]="gameService.useProxy() ? 'bg-blue-600' : 'bg-slate-300'">
+          <div class="bg-white w-4 h-4 rounded-full shadow-sm transition-transform duration-300"
+               [class]="gameService.useProxy() ? 'translate-x-6' : 'translate-x-0'"></div>
         </button>
       </div>
 
-      <!-- Fehlermeldung nur zeigen, wenn Test vorbei UND nicht online -->
-      @if (pingClicked && !isTesting && !gameService.isOnline()) {
-        <div class="mt-4 p-3 bg-red-50 border-l-4 border-red-500 rounded text-red-700 text-xs">
-          Verbindung fehlgeschlagen. Läuft das Backend auf Port {{gameService.port}}?
-        </div>
-      }
+      <div class="space-y-4">
+        @if (!gameService.useProxy()) {
+          <div class="text-left animate-in fade-in slide-in-from-left-2 duration-300">
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-1">Adresse</label>
+            <input type="text" [value]="gameService.host()"
+                   (input)="gameService.host.set($any($event.target).value)"
+                   class="w-full p-3 bg-white border border-slate-200 rounded-lg text-slate-700 outline-none font-mono text-sm focus:ring-2 focus:ring-blue-500 transition-all">
+          </div>
+          <div class="text-left animate-in fade-in slide-in-from-left-2 duration-300">
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-1">Port</label>
+            <input type="number" [value]="gameService.port()"
+                   (input)="gameService.port.set($any($event.target).value)"
+                   class="w-full p-3 bg-white border border-slate-200 rounded-lg text-slate-700 outline-none font-mono text-sm focus:ring-2 focus:ring-blue-500 transition-all">
+          </div>
+        } @else {
+          <div class="p-6 border-2 border-dashed border-slate-200 rounded-xl animate-in fade-in slide-in-from-right-2 duration-300">
+            <p class="text-xs text-slate-500 font-medium italic">Anfragen werden über den Angular Dev-Server (/api) an das Backend weitergeleitet.</p>
+          </div>
+        }
+
+        <button (click)="onCheckPing()" [disabled]="isTesting()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-70 shadow-lg shadow-blue-100 uppercase text-xs tracking-widest">
+          {{ isTesting() ? 'Verbinde...' : 'Server prüfen' }}
+        </button>
+      </div>
     </section>
 
+    <!-- SEKTION 2: Login / Register oder Logout  -->
+    @if (!authService.isLoggedIn()) {
+      <section class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden transition-all text-center"
+               [class.opacity-50]="!gameService.isOnline()">
+
+        <div class="flex items-center gap-4 mb-6">
+          <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">2</span>
+          <h2 class="text-xl font-semibold text-slate-800 uppercase tracking-tight">Anmeldung</h2>
+        </div>
+
+        @if (!gameService.isOnline()) {
+          <div class="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center z-10 p-6">
+            <p class="text-red-500 font-bold text-sm bg-white px-4 py-2 rounded-full shadow-md border border-red-50 text-center">
+              Bitte zuerst Verbindung prüfen
+            </p>
+          </div>
+        }
+
+        <form [formGroup]="authForm" class="space-y-4">
+          <div class="space-y-1 text-left">
+            <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Username</label>
+            <input type="text" formControlName="userName" placeholder="z.B. FRED"
+                   class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+          <div class="space-y-1 text-left">
+            <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Passwort</label>
+            <input type="password" formControlName="password" placeholder="••••••••"
+                   class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+
+          <div class="flex gap-4 pt-4">
+            <button (click)="onLogin()" [disabled]="authForm.invalid || !gameService.isOnline()"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-blue-100 text-xs uppercase tracking-widest">
+              Login
+            </button>
+            <button (click)="onRegister()" [disabled]="authForm.invalid || !gameService.isOnline()"
+                    class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-50 text-xs uppercase tracking-widest">
+              Register
+            </button>
+          </div>
+        </form>
+      </section>
+    } @else {
+      <!-- Statusanzeige wenn eingeloggt -->
+      <section class="bg-white p-10 rounded-2xl shadow-xl border border-blue-50 animate-in zoom-in duration-300 text-center">
+        <div class="space-y-6">
+          <div class="bg-emerald-100 text-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm text-center">
+            ✓
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-slate-800 text-center">Willkommen!</h2>
+            <p class="text-slate-500 mt-1 text-center">Eingeloggt als <span class="font-bold text-blue-600 uppercase">{{ authService.currentUser() }}</span></p>
+          </div>
+          <button (click)="onLogout()" class="w-full bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 font-bold py-3 rounded-xl transition-all active:scale-95 border border-transparent hover:border-red-100 uppercase text-xs tracking-widest">
+            Abmelden (Logout)
+          </button>
+        </div>
+      </section>
+    }
+
+    <!-- Globaler Feedback-Kasten -->
+    @if (authMessage()) {
+      <div class="p-4 rounded-xl text-sm font-medium animate-in slide-in-from-top-4 duration-500 shadow-sm border text-center"
+           [class]="isError() ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'">
+        {{ authMessage() }}
+      </div>
+    }
   </main>
 </div>
