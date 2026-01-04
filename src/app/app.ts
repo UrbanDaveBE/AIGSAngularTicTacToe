@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { GameService } from './services/game.service';
@@ -25,11 +25,18 @@ export class App implements OnInit {
     })
   });
 
+  difficultyControl = new FormControl(1, { nonNullable: true });
+
   // UI-Zustände als Signals
   isTesting = signal(false);
   pingClicked = signal(false);
   authMessage = signal('');
   isError = signal(false);
+  isGameLoading = signal(false);
+
+  board = computed(() => this.gameService.gameState()?.board || [
+    [0, 0, 0], [0, 0, 0], [0, 0, 0]
+  ]);
 
   ngOnInit(): void {
   }
@@ -78,6 +85,47 @@ export class App implements OnInit {
         this.setFeedback(err, true);
         this.authForm.reset();
       }
+    });
+  }
+
+  onStartNewGame() {
+    const token = this.authService.token();
+    if (!token) {
+      this.setFeedback('Kein gültiges Token gefunden. Bitte neu einloggen.', true);
+      return;
+    }
+
+    this.isGameLoading.set(true);
+    this.gameService.startNewGame({
+      token: token,
+      gameType: 'TicTacToe',
+      difficulty: this.difficultyControl.value
+    }).subscribe({
+      next: () => {
+        this.isGameLoading.set(false);
+        this.authMessage.set('');
+      },
+      error: (err) => {
+        this.isGameLoading.set(false);
+        this.setFeedback(err, true);
+      }
+    });
+  }
+
+  onCellClick(row: number, col: number) {
+    const state = this.gameService.gameState();
+    const token = this.authService.token();
+
+    if (!state || state.result || this.board()[row][col] !== 0 || !token) {
+      return;
+    }
+
+    this.gameService.makeMove({
+      token: token,
+      row: row.toString(),
+      col: col.toString()
+    }).subscribe({
+      error: (err) => this.setFeedback(err, true)
     });
   }
 

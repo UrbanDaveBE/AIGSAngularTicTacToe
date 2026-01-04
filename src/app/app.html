@@ -110,20 +110,60 @@
         </form>
       </section>
     } @else {
-      <!-- Statusanzeige wenn eingeloggt -->
+      <!-- SEKTION 3: Spielbereich  -->
+
       <section class="bg-white p-10 rounded-2xl shadow-xl border border-blue-50 animate-in zoom-in duration-300 text-center">
-        <div class="space-y-6">
-          <div class="bg-emerald-100 text-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm text-center">
-            ✓
+
+        <div class="flex justify-between items-center mb-6">
+          <div class="text-left">
+            <h2 class="text-2xl font-bold text-slate-800">TicTacToe</h2>
+            <p class="text-xs text-slate-400">User: <span class="font-bold text-blue-600 uppercase">{{ authService.currentUser() }}</span></p>
           </div>
-          <div>
-            <h2 class="text-2xl font-bold text-slate-800 text-center">Willkommen!</h2>
-            <p class="text-slate-500 mt-1 text-center">Eingeloggt als <span class="font-bold text-blue-600 uppercase">{{ authService.currentUser() }}</span></p>
-          </div>
-          <button (click)="onLogout()" class="w-full bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 font-bold py-3 rounded-xl transition-all active:scale-95 border border-transparent hover:border-red-100 uppercase text-xs tracking-widest">
-            Abmelden (Logout)
-          </button>
+          <button (click)="onLogout()" class="text-xs font-bold text-red-500 hover:underline">Abmelden</button>
         </div>
+
+        @if (!gameService.gameState()) {
+          <!-- Spiel Setup -->
+          <div class="py-8 border-2 border-dashed border-slate-100 rounded-2xl space-y-6">
+            <div class="px-6 text-left">
+              <label class="block text-[10px] font-bold uppercase text-slate-400 mb-2">AI Schwierigkeit</label>
+              <select [formControl]="difficultyControl" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <option [value]="1">Stufe 1 (Random Ruedi)</option>
+                <option [value]="2">Stufe 2 (MinMax Algo)</option>
+              </select>
+            </div>
+            <button (click)="onStartNewGame()" [disabled]="isGameLoading()"
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-10 rounded-2xl shadow-lg shadow-emerald-50 uppercase text-xs tracking-widest transition-all active:scale-95">
+              {{ isGameLoading() ? 'Lade Spiel...' : 'Neues Spiel starten' }}
+            </button>
+          </div>
+        } @else {
+          <!-- Aktives Spielfeld -->
+          <div class="grid grid-cols-3 gap-3 aspect-square bg-slate-100 p-3 rounded-2xl relative">
+            @for (rowIdx of [0, 1, 2]; track rowIdx) {
+              @for (colIdx of [0, 1, 2]; track colIdx) {
+                <button
+                  (click)="onCellClick(rowIdx, colIdx)"
+                  [disabled]="board()[rowIdx][colIdx] !== 0 || gameService.gameState()?.result"
+                  class="bg-white rounded-xl shadow-sm flex items-center justify-center text-4xl font-black transition-all hover:bg-slate-50 active:scale-90 disabled:cursor-not-allowed"
+                  [class.text-blue-600]="board()[rowIdx][colIdx] === 1"
+                  [class.text-red-500]="board()[rowIdx][colIdx] === -1">
+                  {{ board()[rowIdx][colIdx] === 1 ? 'X' : (board()[rowIdx][colIdx] === -1 ? 'O' : '') }}
+                </button>
+              }
+            }
+
+            <!-- Overlay bei Spielende -->
+            @if (gameService.gameState()?.result) {
+              <div class="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl animate-in fade-in duration-500">
+                <p class="text-2xl font-black text-slate-800 uppercase mb-4">Spiel beendet!</p>
+                <button (click)="onStartNewGame()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg uppercase text-xs active:scale-95 transition-all">
+                  Nochmal spielen
+                </button>
+              </div>
+            }
+          </div>
+        }
       </section>
     }
 

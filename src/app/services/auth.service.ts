@@ -12,6 +12,9 @@ export class AuthService {
   private _currentUser = signal<string | null>(null);
   readonly currentUser = this._currentUser.asReadonly();
 
+  private _token = signal<string | null>(null);
+  readonly token = this._token.asReadonly();
+
   private _isLoggedIn = signal<boolean>(false);
   readonly isLoggedIn = this._isLoggedIn.asReadonly();
 
@@ -24,7 +27,7 @@ export class AuthService {
   register(credentials: AuthRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.getBaseUrl()}/users/register`, credentials).pipe(
       map(res => {
-        if (res.error) throw res.error_description || res.error;
+        if (res && res.error) throw res.error_description || res.error;
         return res;
       }),
       catchError(this.handleError)
@@ -34,11 +37,12 @@ export class AuthService {
   login(credentials: AuthRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.getBaseUrl()}/users/login`, credentials).pipe(
       map(res => {
-        if (res.error) throw res.error_description || res.error;
+        if (res && res.error) throw res.error_description || res.error;
         return res;
       }),
       tap((res) => {
         this._currentUser.set(res.userName || credentials.userName);
+        this._token.set(res.token || null);
         this._isLoggedIn.set(true);
       }),
       catchError(this.handleError)
@@ -47,19 +51,20 @@ export class AuthService {
 
   logout(): Observable<any> {
     const user = this._currentUser();
-    if (!user) {
-      this.clearLocalState();
-      return throwError(() => 'Kein Benutzer angemeldet.');
-    }
+    const url = `${this.getBaseUrl()}/users/logout`;
 
-    return this.http.post(`${this.getBaseUrl()}/users/logout`, { userName: user }).pipe(
+    return this.http.post(url, { userName: user }).pipe(
       tap(() => this.clearLocalState()),
-      catchError(this.handleError)
+      catchError((err) => {
+        this.clearLocalState();
+        return this.handleError(err);
+      })
     );
   }
 
   private clearLocalState() {
     this._currentUser.set(null);
+    this._token.set(null);
     this._isLoggedIn.set(false);
   }
 
