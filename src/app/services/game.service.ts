@@ -57,10 +57,14 @@ export class GameService {
     );
   }
 
+  resetGame() {
+    this._gameState.set(null);
+  }
+
   toggleProxy() {
     this.useProxy.update(val => !val);
     this._isOnline.set(false);
-    this._gameState.set(null);
+    this.resetGame();
   }
 
   private handleError(error: any) {

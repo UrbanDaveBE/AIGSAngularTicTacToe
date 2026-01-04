@@ -80,10 +80,12 @@ export class App implements OnInit {
       next: () => {
         this.setFeedback('Abmeldung erfolgreich.', false);
         this.authForm.reset();
+        this.gameService.resetGame();
       },
       error: (err) => {
         this.setFeedback(err, true);
         this.authForm.reset();
+        this.gameService.resetGame();
       }
     });
   }
@@ -110,6 +112,11 @@ export class App implements OnInit {
         this.setFeedback(err, true);
       }
     });
+  }
+
+  onResetGame() {
+    this.gameService.resetGame();
+    this.authMessage.set('');
   }
 
   onCellClick(row: number, col: number) {

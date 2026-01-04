@@ -160,9 +160,22 @@
                 <button (click)="onStartNewGame()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg uppercase text-xs active:scale-95 transition-all">
                   Nochmal spielen
                 </button>
+                <button (click)="onResetGame()" class="mt-4 text-xs font-bold text-slate-500 hover:text-slate-700 uppercase tracking-widest underline decoration-2 underline-offset-4">
+                  Zurück zum Hauptmenü
+                </button>
               </div>
             }
           </div>
+
+          <!-- Reset Button während des Spiels -->
+          @if (!gameService.gameState()?.result) {
+            <button (click)="onResetGame()" class="mt-6 text-xs font-bold text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Spiel abbrechen
+            </button>
+          }
         }
       </section>
     }
