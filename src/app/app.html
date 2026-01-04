@@ -156,13 +156,19 @@
             <!-- Overlay bei Spielende -->
             @if (gameService.gameState()?.result) {
               <div class="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl animate-in fade-in duration-500">
-                <p class="text-2xl font-black text-slate-800 uppercase mb-4">Spiel beendet!</p>
-                <button (click)="onStartNewGame()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg uppercase text-xs active:scale-95 transition-all">
-                  Nochmal spielen
-                </button>
-                <button (click)="onResetGame()" class="mt-4 text-xs font-bold text-slate-500 hover:text-slate-700 uppercase tracking-widest underline decoration-2 underline-offset-4">
-                  Zurück zum Hauptmenü
-                </button>
+                <p class="text-2xl font-black text-slate-800 uppercase mb-2">
+                  {{ winnerStatus() === 'Remis' ? 'Unentschieden!' : (winnerStatus() + '!') }}
+                </p>
+                <p class="text-slate-500 text-sm mb-6 font-medium">Das Spiel ist vorbei.</p>
+
+                <div class="flex flex-col gap-3 w-full px-12">
+                  <button (click)="onStartNewGame()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg uppercase text-xs active:scale-95 transition-all">
+                    Nochmal spielen
+                  </button>
+                  <button (click)="onResetGame()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl uppercase text-xs active:scale-95 transition-all">
+                    Hauptmenü
+                  </button>
+                </div>
               </div>
             }
           </div>

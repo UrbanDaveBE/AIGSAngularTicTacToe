@@ -38,6 +38,35 @@ export class App implements OnInit {
     [0, 0, 0], [0, 0, 0], [0, 0, 0]
   ]);
 
+  /**
+   * Sieg-Ermittlung im Frontend.
+   * Prüft das board() Signal auf 3er-Reihen.
+   * 1 = User (X), -1 = Server (O)
+   */
+  winnerStatus = computed(() => {
+    const b = this.board();
+
+    const checkPlayer = (p: number) => {
+      for (let i = 0; i < 3; i++) {
+        if (b[i][0] === p && b[i][1] === p && b[i][2] === p) return true;
+      }
+      for (let i = 0; i < 3; i++) {
+        if (b[0][i] === p && b[1][i] === p && b[2][i] === p) return true;
+      }
+      if (b[0][0] === p && b[1][1] === p && b[2][2] === p) return true;
+      if (b[0][2] === p && b[1][1] === p && b[2][0] === p) return true;
+      return false;
+    };
+
+    if (checkPlayer(1)) return 'Sieg';
+    if (checkPlayer(-1)) return 'Niederlage';
+
+    const isFull = b.flat().every(cell => cell !== 0);
+    if (isFull) return 'Remis';
+
+    return null;
+  });
+
   ngOnInit(): void {
   }
 
