@@ -244,4 +244,4 @@ Der AIGS Angular Client demonstriert den erfolgreichen Transfer einer klassische
 
 
 ### 12.6 Player-Lose
-![PlayerLoseValidation](screen_2.png)
+![PlayerLoseValidation](screen_6.png)
